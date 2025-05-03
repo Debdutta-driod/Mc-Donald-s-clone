@@ -1,0 +1,2153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McDonald's Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'mcd-red': '#DA291C',
+                        'mcd-yellow': '#FFC72C',
+                        'mcd-orange': '#FF6B00',
+                        'mcd-green': '#00A862',
+                        'mcd-blue': '#0078D4',
+                        'mcd-dark': '#1a1a1a',
+                        'mcd-darker': '#0f0f0f',
+                        'mcd-gold': '#FFD700',
+                    },
+                    animation: {
+                        'landing': 'landing 1s ease-out',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 3s infinite',
+                        'glow': 'glow 2s ease-in-out infinite',
+                        'scale': 'scale 0.3s ease-in-out',
+                        'spring': 'spring 1s ease-in-out',
+                        'spring-hover': 'springHover 0.5s ease-in-out forwards',
+                        'spring-click': 'springClick 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+                    },
+                    keyframes: {
+                        landing: {
+                            '0%': { transform: 'translateY(-100%)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glow: {
+                            '0%, 100%': { filter: 'brightness(100%)' },
+                            '50%': { filter: 'brightness(120%)' },
+                        },
+                        scale: {
+                            '0%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.05)' },
+                            '100%': { transform: 'scale(1)' },
+                        },
+                        spring: {
+                            '0%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.1)' },
+                            '75%': { transform: 'scale(0.95)' },
+                            '100%': { transform: 'scale(1)' },
+                        },
+                        springHover: {
+                            '0%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.15)' },
+                            '75%': { transform: 'scale(0.9)' },
+                            '100%': { transform: 'scale(1.05)' },
+                        },
+                        springClick: {
+                            '0%': { transform: 'scale(1.05)' },
+                            '25%': { transform: 'scale(0.85)' },
+                            '50%': { transform: 'scale(1.1)' },
+                            '75%': { transform: 'scale(0.95)' },
+                            '100%': { transform: 'scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .animate-landing {
+            animation: landing 1s ease-out;
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        .animate-glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+        .animate-scale {
+            animation: scale 0.3s ease-in-out;
+        }
+        .menu-item {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .menu-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #DA291C 0%, #FF6B00 100%);
+        }
+        .dark .gradient-bg {
+            background: linear-gradient(135deg, #8B0000 0%, #CC5500 100%);
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #DA291C;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 1000;
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
+        .dark .toast {
+            background: #8B0000;
+            box-shadow: 0 4px 6px rgba(255,255,255,0.1);
+        }
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .mcd-logo {
+            width: 40px;
+            height: 40px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            transition: all 0.3s ease;
+        }
+        .dark .mcd-logo {
+            filter: drop-shadow(0 2px 4px rgba(255,255,255,0.1)) brightness(0.9);
+        }
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #FFC72C;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .dark .menu-item {
+            background: #1a1a1a;
+            box-shadow: 0 4px 6px rgba(255,255,255,0.05);
+        }
+        .dark .menu-item:hover {
+            box-shadow: 0 12px 24px rgba(255,255,255,0.1);
+            transform: translateY(-5px) scale(1.02);
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .dark-mode-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #FFC72C;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .dark-mode-switch::after {
+            content: '🌞';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .dark .dark-mode-switch {
+            background: #1a1a1a;
+        }
+        .dark .dark-mode-switch::after {
+            content: '🌙';
+            transform: translateX(26px);
+            background: #FFC72C;
+        }
+        .menu-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            border: 2px solid transparent;
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+        }
+        .menu-card:hover {
+            border-color: #FFC72C;
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(255, 199, 44, 0.2);
+        }
+        .dark .menu-card {
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+        }
+        .dark .menu-card:hover {
+            border-color: #DA291C;
+            box-shadow: 0 15px 30px rgba(218, 41, 28, 0.2);
+        }
+        .menu-image-container {
+            position: relative;
+            overflow: hidden;
+        }
+        .menu-image-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .menu-card:hover .menu-image-container::after {
+            opacity: 1;
+        }
+        .add-to-cart-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #DA291C, #FF6B00);
+            border: none;
+        }
+        .add-to-cart-btn:hover {
+            background: linear-gradient(45deg, #FF6B00, #DA291C);
+            transform: scale(1.05);
+        }
+        .add-to-cart-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .add-to-cart-btn:hover::before {
+            left: 100%;
+        }
+        .price-tag {
+            position: relative;
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(45deg, #DA291C, #FF6B00);
+            color: white;
+            border-radius: 0.5rem;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(218, 41, 28, 0.2);
+        }
+        .menu-card:hover .price-tag {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(218, 41, 28, 0.3);
+        }
+        .dark .price-tag {
+            background: linear-gradient(45deg, #8B0000, #CC5500);
+        }
+        .menu-title {
+            position: relative;
+            display: inline-block;
+            color: #DA291C;
+            transition: all 0.3s ease;
+        }
+        .dark .menu-title {
+            color: #FFC72C;
+        }
+        .menu-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #FFC72C, #FF6B00);
+            transition: width 0.3s ease;
+        }
+        .menu-card:hover .menu-title::after {
+            width: 100%;
+        }
+        .dark .menu-title::after {
+            background: linear-gradient(90deg, #DA291C, #FF6B00);
+        }
+        .category-btn {
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #DA291C, #FF6B00);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(218, 41, 28, 0.2);
+        }
+        .category-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(218, 41, 28, 0.3);
+        }
+        .category-btn.active {
+            background: linear-gradient(45deg, #FFC72C, #FF6B00);
+            box-shadow: 0 4px 15px rgba(255, 199, 44, 0.3);
+        }
+        .menu-description {
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        .dark .menu-description {
+            color: #ccc;
+        }
+        .menu-card:hover .menu-description {
+            color: #333;
+        }
+        .dark .menu-card:hover .menu-description {
+            color: #fff;
+        }
+        .menu-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        .dark .menu-section {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        }
+
+        /* Enhanced Hamburger Menu Styles */
+        #hamburgerMenu {
+            position: relative;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        #hamburgerMenu span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: #FFC72C;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+
+        #hamburgerMenu:hover span {
+            background: #FF6B00;
+        }
+
+        #hamburgerMenu.active span:nth-child(1) {
+            transform: translateY(8px) rotate(45deg);
+        }
+
+        #hamburgerMenu.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        #hamburgerMenu.active span:nth-child(3) {
+            transform: translateY(-8px) rotate(-45deg);
+        }
+
+        /* Enhanced Mobile Menu Styles */
+        #mobileMenu {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 85%;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+        }
+
+        #mobileMenu.active {
+            left: 0;
+        }
+
+        #mobileMenu a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: white;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            border-radius: 0.5rem;
+        }
+
+        #mobileMenu a:hover {
+            background: rgba(255, 199, 44, 0.1);
+            border-left: 4px solid #FFC72C;
+            transform: translateX(10px);
+        }
+
+        #mobileMenu h3 {
+            padding: 0.5rem 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dark #mobileMenu {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+        }
+
+        /* Enhanced Order Button Styles */
+        .order-now-btn {
+            position: relative;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(45deg, #FFC72C, #FF6B00);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+            animation: float 3s ease-in-out infinite, glow 2s ease-in-out infinite;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .order-now-btn:hover {
+            animation: spring-hover 0.5s ease-in-out forwards, glow 1.5s ease-in-out infinite;
+            box-shadow: 0 8px 25px rgba(255, 107, 0, 0.4);
+            transform: translateY(-5px) rotateX(10deg);
+            letter-spacing: 1px;
+        }
+
+        .order-now-btn:active {
+            animation: spring-click 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 2px 10px rgba(255, 107, 0, 0.3);
+            transform: translateY(2px) scale(0.95) rotateX(-5deg);
+        }
+
+        .order-now-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.4),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .order-now-btn:hover::before {
+            left: 100%;
+        }
+
+        .order-now-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .order-now-btn:active::after {
+            opacity: 1;
+            animation: ripple 0.6s ease-out, pulse 0.6s ease-out;
+        }
+
+        .order-now-btn .click-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .order-now-btn:active .click-effect {
+            animation: clickWave 0.6s ease-out;
+        }
+
+        @keyframes clickWave {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 0.5;
+            }
+            100% {
+                width: 200px;
+                height: 200px;
+                opacity: 0;
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+            }
+            50% {
+                box-shadow: 0 4px 25px rgba(255, 107, 0, 0.5);
+            }
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes spring-hover {
+            0% {
+                transform: translateY(0) scale(1) rotateX(0);
+            }
+            50% {
+                transform: translateY(-15px) scale(1.1) rotateX(15deg);
+            }
+            100% {
+                transform: translateY(-5px) scale(1.05) rotateX(10deg);
+            }
+        }
+
+        @keyframes spring-click {
+            0% {
+                transform: translateY(-5px) scale(1.05) rotateX(10deg);
+            }
+            25% {
+                transform: translateY(5px) scale(0.95) rotateX(-5deg);
+            }
+            50% {
+                transform: translateY(-2px) scale(1.02) rotateX(5deg);
+            }
+            75% {
+                transform: translateY(1px) scale(0.98) rotateX(-2deg);
+            }
+            100% {
+                transform: translateY(0) scale(1) rotateX(0);
+            }
+        }
+
+        .dark .order-now-btn {
+            background: linear-gradient(45deg, #FFC72C, #FF6B00);
+            box-shadow: 0 4px 15px rgba(255, 199, 44, 0.3);
+        }
+
+        .dark .order-now-btn:hover {
+            box-shadow: 0 8px 25px rgba(255, 199, 44, 0.4);
+        }
+
+        /* Add to Cart Button Animation */
+        .add-to-cart-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #DA291C, #FF6B00);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(218, 41, 28, 0.2);
+        }
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(218, 41, 28, 0.3);
+        }
+
+        .add-to-cart-btn:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        .add-to-cart-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .add-to-cart-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Dark mode adjustments */
+        .dark #mobileMenu {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+        }
+
+        .dark .add-to-cart-btn {
+            background: linear-gradient(45deg, #8B0000, #CC5500);
+            box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
+        }
+
+        /* Welcome Section Animations */
+        .welcome-text {
+            animation: welcomeSlide 1.5s ease-out;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .welcome-subtext {
+            animation: welcomeSlide 1.5s ease-out 0.3s backwards;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes welcomeSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            60% {
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Enhanced FAQ Styles */
+        .faq-item {
+            transition: all 0.3s ease;
+            transform-origin: top;
+            perspective: 1000px;
+        }
+
+        .faq-question {
+            position: relative;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #ffffff, #f8f9fa);
+            border: none;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .dark .faq-question {
+            background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+        }
+
+        .faq-question::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #FFC72C, #FF6B00);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+
+        .faq-question:hover::before {
+            opacity: 0.1;
+        }
+
+        .faq-question span {
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question:hover span {
+            transform: translateX(10px);
+            color: #FF6B00;
+        }
+
+        .dark .faq-question:hover span {
+            color: #FFC72C;
+        }
+
+        .faq-question i {
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top;
+            opacity: 0;
+            transform: rotateX(-90deg);
+            background: linear-gradient(45deg, #f8f9fa, #ffffff);
+            border-radius: 0 0 8px 8px;
+        }
+
+        .dark .faq-answer {
+            background: linear-gradient(45deg, #2a2a2a, #1a1a1a);
+        }
+
+        .faq-answer.active {
+            max-height: 500px;
+            opacity: 1;
+            transform: rotateX(0);
+            padding: 1rem;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .faq-answer.active {
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .faq-item.active .faq-question {
+            border-radius: 8px 8px 0 0;
+            background: linear-gradient(45deg, #FFC72C, #FF6B00);
+            color: white;
+        }
+
+        .dark .faq-item.active .faq-question {
+            background: linear-gradient(45deg, #FF6B00, #FFC72C);
+        }
+
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+            color: white;
+        }
+
+        .faq-item.active .faq-question span {
+            color: white;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .faq-answer p {
+            animation: slideDown 0.3s ease-out forwards;
+        }
+
+        /* Enhanced Career Section Styles */
+        .career-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .career-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #FFC72C, #FF6B00);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 0;
+        }
+
+        .career-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .career-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(255, 107, 0, 0.2);
+        }
+
+        .career-icon {
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s ease;
+        }
+
+        .career-card:hover .career-icon {
+            transform: scale(1.2) rotate(5deg);
+            color: #FF6B00;
+        }
+
+        .apply-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #FFC72C, #FF6B00);
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+        }
+
+        .apply-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 0, 0.4);
+        }
+
+        .apply-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .apply-btn:hover::before {
+            left: 100%;
+        }
+
+        .process-step {
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        .process-step:hover {
+            transform: translateY(-5px);
+        }
+
+        .process-step::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(45deg, #FFC72C, #FF6B00);
+            transition: all 0.4s ease;
+            transform: translateX(-50%);
+        }
+
+        .process-step:hover::after {
+            width: 50%;
+        }
+
+        /* Enhanced Contact Section Styles */
+        .contact-section {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #FFC72C 0%, #FF6B00 100%);
+            padding: 4rem 0;
+        }
+
+        .contact-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1" fill="rgba(255,255,255,0.1)"/></svg>');
+            opacity: 0.1;
+            animation: patternMove 20s linear infinite;
+        }
+
+        @keyframes patternMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 100px 100px; }
+        }
+
+        .contact-title {
+            position: relative;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            animation: titleEntrance 1s ease-out;
+        }
+
+        @keyframes titleEntrance {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .contact-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            animation: cardEntrance 0.6s ease-out backwards;
+        }
+
+        .contact-card:nth-child(1) { animation-delay: 0.2s; }
+        .contact-card:nth-child(2) { animation-delay: 0.4s; }
+        .contact-card:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes cardEntrance {
+            0% {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .contact-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #FFC72C, #FF6B00);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 0;
+        }
+
+        .contact-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(255, 107, 0, 0.3);
+        }
+
+        .contact-icon {
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s ease;
+            color: #FF6B00;
+            font-size: 2rem;
+        }
+
+        .contact-card:hover .contact-icon {
+            transform: scale(1.2) rotate(5deg);
+            color: #FFC72C;
+        }
+
+        .social-links {
+            animation: socialEntrance 0.8s ease-out backwards;
+        }
+
+        @keyframes socialEntrance {
+            0% {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .social-link {
+            position: relative;
+            display: inline-block;
+            transition: all 0.3s ease;
+            color: #FF6B00;
+            font-size: 2rem;
+            margin: 0 1rem;
+        }
+
+        .social-link:hover {
+            transform: translateY(-3px) scale(1.1);
+            color: #FFC72C;
+        }
+
+        .social-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, #FFC72C, #FF6B00);
+            transition: width 0.3s ease;
+        }
+
+        .social-link:hover::after {
+            width: 100%;
+        }
+
+        .contact-info {
+            position: relative;
+            z-index: 1;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .contact-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-info p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Add gradient transitions between sections */
+        .section-transition {
+            position: relative;
+        }
+
+        .section-transition::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(to bottom, transparent, rgba(255, 199, 44, 0.1));
+            pointer-events: none;
+        }
+
+        .section-transition::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(to top, transparent, rgba(255, 199, 44, 0.1));
+            pointer-events: none;
+        }
+
+        .dark .section-transition::before {
+            background: linear-gradient(to bottom, transparent, rgba(255, 199, 44, 0.05));
+        }
+
+        .dark .section-transition::after {
+            background: linear-gradient(to top, transparent, rgba(255, 199, 44, 0.05));
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-mcd-dark transition-all duration-300">
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="md:hidden">
+        <div class="container mx-auto px-4 py-6">
+            <!-- Main Navigation -->
+            <div class="flex flex-col space-y-4 mb-8">
+                <h3 class="text-lg font-bold text-mcd-yellow mb-2">Main Menu</h3>
+                <a href="#menu" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center">
+                    <i class="fas fa-utensils mr-3"></i>Menu
+                </a>
+                <a href="#deals" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center">
+                    <i class="fas fa-tags mr-3"></i>Deals
+                </a>
+                <a href="#about" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center">
+                    <i class="fas fa-info-circle mr-3"></i>About
+                </a>
+                <a href="#contact" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center">
+                    <i class="fas fa-envelope mr-3"></i>Contact
+                </a>
+                <a href="#careers" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center">
+                    <i class="fas fa-briefcase mr-3"></i>Careers
+                </a>
+            </div>
+
+            <!-- Food Categories -->
+            <div class="flex flex-col space-y-4 mb-8">
+                <h3 class="text-lg font-bold text-mcd-yellow mb-2">Food Categories</h3>
+                <a href="#burgers" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center" data-category="burgers">
+                    <i class="fas fa-hamburger mr-3"></i>Burgers
+                </a>
+                <a href="#chicken" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center" data-category="chicken">
+                    <i class="fas fa-drumstick-bite mr-3"></i>Chicken
+                </a>
+                <a href="#sides" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center" data-category="sides">
+                    <i class="fas fa-french-fries mr-3"></i>Sides
+                </a>
+                <a href="#drinks" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center" data-category="drinks">
+                    <i class="fas fa-glass-martini-alt mr-3"></i>Drinks
+                </a>
+                <a href="#desserts" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center" data-category="desserts">
+                    <i class="fas fa-ice-cream mr-3"></i>Desserts
+                </a>
+                <a href="#breakfast" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center" data-category="breakfast">
+                    <i class="fas fa-coffee mr-3"></i>Breakfast
+                </a>
+                <a href="#mccafe" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center" data-category="mccafe">
+                    <i class="fas fa-mug-hot mr-3"></i>McCafé
+                </a>
+            </div>
+
+            <!-- Account & Services -->
+            <div class="flex flex-col space-y-4 mb-8">
+                <h3 class="text-lg font-bold text-mcd-yellow mb-2">Account & Services</h3>
+                <a href="#account" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center">
+                    <i class="fas fa-user mr-3"></i>My Account
+                </a>
+                <a href="#orders" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center">
+                    <i class="fas fa-receipt mr-3"></i>My Orders
+                </a>
+                <a href="#favorites" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center">
+                    <i class="fas fa-heart mr-3"></i>Favorites
+                </a>
+                <a href="#delivery" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center">
+                    <i class="fas fa-truck mr-3"></i>Delivery
+                </a>
+            </div>
+
+            <!-- Support -->
+            <div class="flex flex-col space-y-4">
+                <h3 class="text-lg font-bold text-mcd-yellow mb-2">Support</h3>
+                <a href="#help" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center">
+                    <i class="fas fa-question-circle mr-3"></i>Help Center
+                </a>
+                <a href="#feedback" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center">
+                    <i class="fas fa-comment-alt mr-3"></i>Feedback
+                </a>
+                <a href="#locations" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center">
+                    <i class="fas fa-map-marker-alt mr-3"></i>Find Locations
+                </a>
+                <a href="#app" class="py-2 hover:text-mcd-yellow dark:text-white flex items-center">
+                    <i class="fas fa-mobile-alt mr-3"></i>Download App
+                </a>
+            </div>
+
+            <!-- Social Media -->
+            <div class="mt-8 pt-6 border-t border-gray-700">
+                <h3 class="text-lg font-bold text-mcd-yellow mb-4">Follow Us</h3>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-2xl text-white hover:text-mcd-yellow transition-colors">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                    <a href="#" class="text-2xl text-white hover:text-mcd-yellow transition-colors">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-2xl text-white hover:text-mcd-yellow transition-colors">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="text-2xl text-white hover:text-mcd-yellow transition-colors">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-800 shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-8">
+                    <a href="#" class="logo-container">
+                        <img src="https://www.mcdonalds.com/content/dam/sites/usa/nfl/icons/arches-logo_108x108.jpg" alt="McDonald's Logo" class="w-10 h-10 animate-glow">
+                        <span class="text-xl font-bold text-mcd-red dark:text-white">McDonald's</span>
+                    </a>
+                    <div class="flex items-center space-x-6">
+                        <a href="#menu" class="nav-link text-gray-700 dark:text-white hover:text-mcd-red dark:hover:text-mcd-yellow transition-all duration-300 relative group">
+                            Menu
+                            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-mcd-red dark:bg-mcd-yellow transition-all duration-300 group-hover:w-full"></span>
+                        </a>
+                        <a href="#deals" class="nav-link text-gray-700 dark:text-white hover:text-mcd-red dark:hover:text-mcd-yellow transition-all duration-300 relative group">
+                            Deals
+                            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-mcd-red dark:bg-mcd-yellow transition-all duration-300 group-hover:w-full"></span>
+                        </a>
+                        <a href="#about" class="nav-link text-gray-700 dark:text-white hover:text-mcd-red dark:hover:text-mcd-yellow transition-all duration-300 relative group">
+                            About
+                            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-mcd-red dark:bg-mcd-yellow transition-all duration-300 group-hover:w-full"></span>
+                        </a>
+                        <a href="#contact" class="nav-link text-gray-700 dark:text-white hover:text-mcd-red dark:hover:text-mcd-yellow transition-all duration-300 relative group">
+                            Contact
+                            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-mcd-red dark:bg-mcd-yellow transition-all duration-300 group-hover:w-full"></span>
+                        </a>
+                        <a href="#careers" class="nav-link text-gray-700 dark:text-white hover:text-mcd-red dark:hover:text-mcd-yellow transition-all duration-300 relative group">
+                            Careers
+                            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-mcd-red dark:bg-mcd-yellow transition-all duration-300 group-hover:w-full"></span>
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <button id="searchBtn" class="text-gray-700 dark:text-white hover:text-mcd-red dark:hover:text-mcd-yellow transition-all duration-300 transform hover:scale-110">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button id="cartBtn" class="text-gray-700 dark:text-white hover:text-mcd-red dark:hover:text-mcd-yellow transition-all duration-300 transform hover:scale-110 relative">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cartCount" class="absolute -top-2 -right-2 bg-mcd-yellow text-mcd-red rounded-full w-5 h-5 text-xs flex items-center justify-center animate-pulse-slow">0</span>
+                    </button>
+                    <div class="dark-mode-switch" id="darkModeToggle"></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Search Modal -->
+    <div id="searchModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+        <div class="bg-white dark:bg-gray-800 mx-auto mt-20 max-w-2xl rounded-lg p-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Search Menu</h3>
+                <button id="closeSearch" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <input type="text" placeholder="Search for items..." class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white">
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-r from-mcd-red via-mcd-orange to-mcd-yellow text-white py-16 relative overflow-hidden">
+        <div class="absolute inset-0 bg-black opacity-20"></div>
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 welcome-text">Welcome to McDonald's</h1>
+            <p class="text-xl mb-8 welcome-subtext">Delicious Food, Delivered Fast</p>
+            <a href="#menu" class="order-now-btn">
+                Order Now
+                <span class="click-effect"></span>
+            </a>
+        </div>
+        <div class="absolute -bottom-4 left-0 w-full h-16 bg-gradient-to-b from-transparent to-gray-100 dark:to-mcd-dark"></div>
+    </section>
+
+    <!-- Menu Section -->
+    <section class="py-12 menu-section section-transition">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-8 dark:text-white animate-landing">Our Menu</h2>
+        </div>
+    </section>
+
+    <!-- Menu Items -->
+    <section class="py-12 menu-section section-transition">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Big Mac Card -->
+                <div class="menu-card rounded-lg shadow-lg overflow-hidden" data-category="burgers">
+                    <div class="menu-image-container">
+                        <div class="swiper">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Classic Burger" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1586816001966-79b736744398?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Burger Detail" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                            </div>
+                            <div class="swiper-pagination"></div>
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-button-prev"></div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="menu-title text-xl font-bold mb-2">Classic Burger</h3>
+                        <p class="menu-description mb-4">Juicy beef patty with fresh lettuce, tomatoes, cheese, and our special sauce on a toasted bun.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="price-tag text-xl font-bold">$5.99</span>
+                            <button class="add-to-cart-btn text-white px-4 py-2 rounded-full">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- French Fries Card -->
+                <div class="menu-card rounded-lg shadow-lg overflow-hidden" data-category="sides">
+                    <div class="menu-image-container">
+                        <div class="swiper">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Crispy Fries" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Fries Detail" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                            </div>
+                            <div class="swiper-pagination"></div>
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-button-prev"></div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="menu-title text-xl font-bold mb-2">Crispy Fries</h3>
+                        <p class="menu-description mb-4">Golden crispy fries seasoned with our special blend of spices, served hot and fresh.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="price-tag text-xl font-bold">$3.99</span>
+                            <button class="add-to-cart-btn text-white px-4 py-2 rounded-full">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coca-Cola Card -->
+                <div class="menu-card rounded-lg shadow-lg overflow-hidden" data-category="drinks">
+                    <div class="menu-image-container">
+                        <div class="swiper">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Refreshing Cola" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Cola Detail" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                            </div>
+                            <div class="swiper-pagination"></div>
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-button-prev"></div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="menu-title text-xl font-bold mb-2">Refreshing Cola</h3>
+                        <p class="menu-description mb-4">Ice-cold cola with the perfect balance of sweetness and fizz, served in a chilled glass.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="price-tag text-xl font-bold">$2.49</span>
+                            <button class="add-to-cart-btn text-white px-4 py-2 rounded-full">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quarter Pounder Card -->
+                <div class="menu-card rounded-lg shadow-lg overflow-hidden" data-category="burgers">
+                    <div class="menu-image-container">
+                        <div class="swiper">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1553979459-d2229ba7433b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Double Cheeseburger" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1553979459-d2229ba7433b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Double Cheeseburger Detail" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                            </div>
+                            <div class="swiper-pagination"></div>
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-button-prev"></div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="menu-title text-xl font-bold mb-2">Double Cheeseburger</h3>
+                        <p class="menu-description mb-4">Two juicy beef patties with double cheese, fresh vegetables, and our signature sauce.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="price-tag text-xl font-bold">$6.49</span>
+                            <button class="add-to-cart-btn text-white px-4 py-2 rounded-full">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spicy Crispy Chicken -->
+                <div class="menu-card rounded-lg shadow-lg overflow-hidden" data-category="chicken">
+                    <div class="menu-image-container">
+                        <div class="swiper">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Spicy Crispy Chicken" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Spicy Crispy Chicken Detail" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                            </div>
+                            <div class="swiper-pagination"></div>
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-button-prev"></div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="menu-title text-xl font-bold mb-2">Spicy Crispy Chicken</h3>
+                        <p class="menu-description mb-4">Crispy chicken fillet with spicy seasoning, fresh lettuce, and creamy mayo in a toasted bun.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="price-tag text-xl font-bold">$6.99</span>
+                            <button class="add-to-cart-btn text-white px-4 py-2 rounded-full">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chicken Fries -->
+                <div class="menu-card rounded-lg shadow-lg overflow-hidden" data-category="chicken">
+                    <div class="menu-image-container">
+                        <div class="swiper">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Chicken Fries" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Chicken Fries Detail" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                            </div>
+                            <div class="swiper-pagination"></div>
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-button-prev"></div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="menu-title text-xl font-bold mb-2">Chicken Fries (6pc)</h3>
+                        <p class="menu-description mb-4">Crispy, tender chicken fries served with your choice of dipping sauce.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="price-tag text-xl font-bold">$4.99</span>
+                            <button class="add-to-cart-btn text-white px-4 py-2 rounded-full">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sausage Burrito -->
+                <div class="menu-card rounded-lg shadow-lg overflow-hidden" data-category="breakfast">
+                    <div class="menu-image-container">
+                        <div class="swiper">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1626700051175-6818013e1d4f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Sausage Burrito" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1626700051175-6818013e1d4f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Sausage Burrito Detail" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                            </div>
+                            <div class="swiper-pagination"></div>
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-button-prev"></div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="menu-title text-xl font-bold mb-2">Sausage Burrito</h3>
+                        <p class="menu-description mb-4">Flour tortilla filled with scrambled eggs, sausage, cheese, and potatoes.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="price-tag text-xl font-bold">$3.99</span>
+                            <button class="add-to-cart-btn text-white px-4 py-2 rounded-full">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vanilla Ice Cream -->
+                <div class="menu-card rounded-lg shadow-lg overflow-hidden" data-category="desserts">
+                    <div class="menu-image-container">
+                        <div class="swiper">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Vanilla Ice Cream" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Vanilla Ice Cream Detail" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                            </div>
+                            <div class="swiper-pagination"></div>
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-button-prev"></div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="menu-title text-xl font-bold mb-2">Vanilla Ice Cream</h3>
+                        <p class="menu-description mb-4">Creamy vanilla soft serve ice cream in a crispy cone.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="price-tag text-xl font-bold">$1.99</span>
+                            <button class="add-to-cart-btn text-white px-4 py-2 rounded-full">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pepsi -->
+                <div class="menu-card rounded-lg shadow-lg overflow-hidden" data-category="drinks">
+                    <div class="menu-image-container">
+                        <div class="swiper">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1553456558-aff63285bdd1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Pepsi" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src="https://images.unsplash.com/photo-1553456558-aff63285bdd1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Pepsi Detail" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                                </div>
+                            </div>
+                            <div class="swiper-pagination"></div>
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-button-prev"></div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="menu-title text-xl font-bold mb-2">Pepsi</h3>
+                        <p class="menu-description mb-4">Refreshing cola drink served ice-cold.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="price-tag text-xl font-bold">$2.49</span>
+                            <button class="add-to-cart-btn text-white px-4 py-2 rounded-full">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-16 bg-gray-50 dark:bg-gray-800 section-transition">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-8 dark:text-white">Frequently Asked Questions</h2>
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="faq-item bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-question w-full px-6 py-4 text-left flex justify-between items-center">
+                        <span class="font-semibold dark:text-white">What are your operating hours?</span>
+                        <i class="fas fa-chevron-down transition-transform"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p class="text-gray-600 dark:text-gray-300">Most of our restaurants are open 24/7. However, some locations may have different hours. Please check your local restaurant for specific operating hours.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-question w-full px-6 py-4 text-left flex justify-between items-center">
+                        <span class="font-semibold dark:text-white">Do you offer delivery services?</span>
+                        <i class="fas fa-chevron-down transition-transform"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p class="text-gray-600 dark:text-gray-300">Yes, we offer delivery through various third-party delivery services. You can also order through our mobile app or website for delivery or pickup.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-question w-full px-6 py-4 text-left flex justify-between items-center">
+                        <span class="font-semibold dark:text-white">What payment methods do you accept?</span>
+                        <i class="fas fa-chevron-down transition-transform"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p class="text-gray-600 dark:text-gray-300">We accept cash, credit/debit cards, mobile payments, and our McDonald's app for payment. Some locations may also accept contactless payments.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-question w-full px-6 py-4 text-left flex justify-between items-center">
+                        <span class="font-semibold dark:text-white">Do you have vegetarian options?</span>
+                        <i class="fas fa-chevron-down transition-transform"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p class="text-gray-600 dark:text-gray-300">Yes, we offer several vegetarian options including salads, wraps, and sides. Please check our menu for the complete list of vegetarian items.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+        <div class="bg-white dark:bg-gray-800 mx-auto mt-20 max-w-2xl rounded-lg p-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold dark:text-white">Your Cart</h3>
+                <button id="closeCart" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="cartItems" class="space-y-4">
+                <!-- Cart items will be added dynamically -->
+            </div>
+            <div class="mt-4 pt-4 border-t">
+                <div class="flex justify-between mb-2">
+                    <span class="dark:text-white">Subtotal:</span>
+                    <span id="subtotal" class="font-bold dark:text-white">$0.00</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span class="dark:text-white">Tax (8%):</span>
+                    <span id="tax" class="font-bold dark:text-white">$0.00</span>
+                </div>
+                <div class="flex justify-between mb-4">
+                    <span class="dark:text-white">Total:</span>
+                    <span id="total" class="font-bold dark:text-white">$0.00</span>
+                </div>
+                <button id="checkoutBtn" class="w-full bg-mcd-red text-white py-3 rounded-lg hover:bg-red-700 transition-colors">
+                    Proceed to Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+        <div class="bg-white dark:bg-gray-800 mx-auto mt-20 max-w-2xl rounded-lg p-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold dark:text-white">Payment</h3>
+                <button id="closePayment" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div class="flex space-x-4">
+                    <button class="payment-method active px-4 py-2 border rounded-lg dark:text-white">
+                        <i class="fas fa-credit-card mr-2"></i>Credit Card
+                    </button>
+                    <button class="payment-method px-4 py-2 border rounded-lg dark:text-white">
+                        <i class="fab fa-paypal mr-2"></i>PayPal
+                    </button>
+                    <button class="payment-method px-4 py-2 border rounded-lg dark:text-white">
+                        <i class="fab fa-apple-pay mr-2"></i>Apple Pay
+                    </button>
+                </div>
+                <div id="creditCardForm" class="space-y-4">
+                    <input type="text" placeholder="Card Number" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" placeholder="Expiry Date" class="p-2 border rounded-lg dark:bg-gray-700 dark:text-white">
+                        <input type="text" placeholder="CVV" class="p-2 border rounded-lg dark:bg-gray-700 dark:text-white">
+                    </div>
+                </div>
+                <button id="payBtn" class="w-full bg-mcd-red text-white py-3 rounded-lg hover:bg-red-700 transition-colors">
+                    Pay Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-gray-50 dark:bg-gray-800 section-transition">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-8 dark:text-white">About McDonald's</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <h3 class="text-2xl font-bold text-mcd-red">Our Story</h3>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        McDonald's was founded in 1940 by brothers Richard and Maurice McDonald in San Bernardino, California. 
+                        What started as a small drive-in restaurant has grown into one of the world's leading food service retailers, 
+                        serving millions of customers daily across more than 100 countries.
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Our commitment to quality, service, cleanliness, and value has made us a global leader in the quick-service 
+                        restaurant industry. We continue to innovate and evolve while staying true to our core values.
+                    </p>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-2xl font-bold text-mcd-red">Our Values</h3>
+                    <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-2">
+                        <li>Quality: We're committed to serving the highest quality food and beverages</li>
+                        <li>Service: We provide fast, friendly, and accurate service</li>
+                        <li>Cleanliness: We maintain clean, comfortable restaurants</li>
+                        <li>Value: We offer great value for money</li>
+                        <li>Sustainability: We're committed to sustainable practices</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <i class="fas fa-globe text-4xl text-mcd-red mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2 dark:text-white">Global Presence</h4>
+                    <p class="text-gray-600 dark:text-gray-300">Operating in over 100 countries with more than 38,000 locations</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-users text-4xl text-mcd-red mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2 dark:text-white">Our People</h4>
+                    <p class="text-gray-600 dark:text-gray-300">Employing over 1.7 million people worldwide</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-heart text-4xl text-mcd-red mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2 dark:text-white">Community</h4>
+                    <p class="text-gray-600 dark:text-gray-300">Supporting local communities through various initiatives</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-white dark:bg-gray-700">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-8 dark:text-white">Contact Us</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <h3 class="text-2xl font-bold text-mcd-red">Get in Touch</h3>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Have questions or feedback? We'd love to hear from you. Contact us through any of the following channels:
+                    </p>
+                    <div class="space-y-2">
+                        <p class="flex items-center text-gray-600 dark:text-gray-300">
+                            <i class="fas fa-phone mr-2 text-mcd-red"></i>
+                            Customer Service: 1-800-244-6227
+                        </p>
+                        <p class="flex items-center text-gray-600 dark:text-gray-300">
+                            <i class="fas fa-envelope mr-2 text-mcd-red"></i>
+                            Email: customer.service@mcdonalds.com
+                        </p>
+                        <p class="flex items-center text-gray-600 dark:text-gray-300">
+                            <i class="fas fa-map-marker-alt mr-2 text-mcd-red"></i>
+                            Corporate Office: 110 North Carpenter Street, Chicago, IL 60607
+                        </p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-2xl font-bold text-mcd-red">Follow Us</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-2xl text-mcd-red hover:text-mcd-dark-red transition-colors">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="#" class="text-2xl text-mcd-red hover:text-mcd-dark-red transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-2xl text-mcd-red hover:text-mcd-dark-red transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-2xl text-mcd-red hover:text-mcd-dark-red transition-colors">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Careers Section -->
+    <section id="careers" class="py-16 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 section-transition">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 dark:text-white animate-float">Join Our Team</h2>
+            
+            <!-- Career Benefits -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <div class="career-card rounded-lg p-6 shadow-lg">
+                    <div class="career-icon text-4xl text-mcd-red mb-4">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 dark:text-white">Education Benefits</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Access to Archways to Opportunity program, offering tuition assistance and English language courses.</p>
+                </div>
+                
+                <div class="career-card rounded-lg p-6 shadow-lg">
+                    <div class="career-icon text-4xl text-mcd-red mb-4">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 dark:text-white">Health & Wellness</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Comprehensive medical, dental, and vision coverage for eligible employees.</p>
+                </div>
+                
+                <div class="career-card rounded-lg p-6 shadow-lg">
+                    <div class="career-icon text-4xl text-mcd-red mb-4">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 dark:text-white">Career Growth</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Clear path for advancement with leadership development programs.</p>
+                </div>
+            </div>
+
+            <!-- Available Positions -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold mb-6 dark:text-white animate-pulse">Open Positions</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="career-card rounded-lg p-6 shadow-lg">
+                        <h4 class="text-xl font-bold mb-2 dark:text-white">Restaurant Manager</h4>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Lead and inspire a team while ensuring exceptional customer service and operational excellence.</p>
+                        <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 mb-4">
+                            <li>2+ years of restaurant management experience</li>
+                            <li>Strong leadership skills</li>
+                            <li>Excellent communication abilities</li>
+                        </ul>
+                        <button class="apply-btn">
+                            Apply Now
+                        </button>
+                    </div>
+
+                    <div class="career-card rounded-lg p-6 shadow-lg">
+                        <h4 class="text-xl font-bold mb-2 dark:text-white">Crew Member</h4>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Join our team and learn valuable skills while providing great customer service.</p>
+                        <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 mb-4">
+                            <li>Flexible scheduling</li>
+                            <li>No experience required</li>
+                            <li>Training provided</li>
+                        </ul>
+                        <button class="apply-btn">
+                            Apply Now
+                        </button>
+                    </div>
+
+                    <div class="career-card rounded-lg p-6 shadow-lg">
+                        <h4 class="text-xl font-bold mb-2 dark:text-white">Shift Manager</h4>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Supervise restaurant operations and lead the team during your shift.</p>
+                        <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 mb-4">
+                            <li>1+ year of restaurant experience</li>
+                            <li>Leadership potential</li>
+                            <li>Problem-solving skills</li>
+                        </ul>
+                        <button class="apply-btn">
+                            Apply Now
+                        </button>
+                    </div>
+
+                    <div class="career-card rounded-lg p-6 shadow-lg">
+                        <h4 class="text-xl font-bold mb-2 dark:text-white">Maintenance Technician</h4>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Keep our restaurants running smoothly with your technical expertise.</p>
+                        <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 mb-4">
+                            <li>Technical background</li>
+                            <li>Equipment maintenance experience</li>
+                            <li>Problem-solving abilities</li>
+                        </ul>
+                        <button class="apply-btn">
+                            Apply Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Application Process -->
+            <div class="bg-white dark:bg-gray-700 rounded-lg p-8 shadow-lg">
+                <h3 class="text-2xl font-bold mb-6 dark:text-white">How to Apply</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="process-step text-center">
+                        <div class="text-3xl text-mcd-red mb-4">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h4 class="font-bold mb-2 dark:text-white">1. Find a Position</h4>
+                        <p class="text-gray-600 dark:text-gray-300">Browse our open positions and find the perfect fit for you.</p>
+                    </div>
+                    <div class="process-step text-center">
+                        <div class="text-3xl text-mcd-red mb-4">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h4 class="font-bold mb-2 dark:text-white">2. Apply Online</h4>
+                        <p class="text-gray-600 dark:text-gray-300">Complete our online application form with your details.</p>
+                    </div>
+                    <div class="process-step text-center">
+                        <div class="text-3xl text-mcd-red mb-4">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <h4 class="font-bold mb-2 dark:text-white">3. Interview</h4>
+                        <p class="text-gray-600 dark:text-gray-300">Meet with our team to discuss your experience and goals.</p>
+                    </div>
+                    <div class="process-step text-center">
+                        <div class="text-3xl text-mcd-red mb-4">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h4 class="font-bold mb-2 dark:text-white">4. Join Us</h4>
+                        <p class="text-gray-600 dark:text-gray-300">Complete onboarding and start your McDonald's journey.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+    <script>
+        // Dark mode functionality
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const html = document.documentElement;
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true' || 
+            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+
+        // Toggle dark mode
+        darkModeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+        });
+
+        // Initialize Swiper
+        const swipers = document.querySelectorAll('.swiper');
+        swipers.forEach(swiper => {
+            new Swiper(swiper, {
+                slidesPerView: 1,
+                spaceBetween: 0,
+                loop: true,
+                autoplay: {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: swiper.querySelector('.swiper-pagination'),
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: swiper.querySelector('.swiper-button-next'),
+                    prevEl: swiper.querySelector('.swiper-button-prev'),
+                },
+            });
+        });
+
+        // Category filtering
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        const menuLinks = document.querySelectorAll('.menu-bar a[data-category]');
+        const menuCards = document.querySelectorAll('.menu-card');
+
+        function filterAndScroll(category) {
+            // Update category buttons
+            categoryButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-category') === category);
+            });
+
+            // Filter menu cards
+            menuCards.forEach(card => {
+                if (category === 'all' || card.getAttribute('data-category') === category) {
+                    card.style.display = 'block';
+                    // Smooth scroll to the first visible card
+                    if (category !== 'all') {
+                        const firstVisibleCard = document.querySelector(`.menu-card[data-category="${category}"]`);
+                        if (firstVisibleCard) {
+                            firstVisibleCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Handle category button clicks
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const category = button.getAttribute('data-category');
+                filterAndScroll(category);
+            });
+        });
+
+        // Handle menu bar link clicks
+        menuLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const category = link.getAttribute('data-category');
+                filterAndScroll(category);
+            });
+        });
+
+        // Mobile menu functionality
+        const hamburgerMenu = document.getElementById('hamburgerMenu');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuLinks = document.querySelectorAll('#mobileMenu a');
+
+        hamburgerMenu.addEventListener('click', () => {
+            hamburgerMenu.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+        });
+
+        mobileMenuLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                hamburgerMenu.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+
+        // Search modal functionality
+        const searchBtn = document.getElementById('searchBtn');
+        const searchModal = document.getElementById('searchModal');
+        const closeSearch = document.getElementById('closeSearch');
+
+        searchBtn.addEventListener('click', () => {
+            searchModal.classList.remove('hidden');
+        });
+
+        closeSearch.addEventListener('click', () => {
+            searchModal.classList.add('hidden');
+        });
+
+        // Cart modal functionality
+        const cartBtn = document.getElementById('cartBtn');
+        const cartModal = document.getElementById('cartModal');
+        const closeCart = document.getElementById('closeCart');
+
+        cartBtn.addEventListener('click', () => {
+            cartModal.classList.remove('hidden');
+        });
+
+        closeCart.addEventListener('click', () => {
+            cartModal.classList.add('hidden');
+        });
+
+        // Payment modal functionality
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const paymentModal = document.getElementById('paymentModal');
+        const closePayment = document.getElementById('closePayment');
+
+        checkoutBtn.addEventListener('click', () => {
+            cartModal.classList.add('hidden');
+            paymentModal.classList.remove('hidden');
+        });
+
+        closePayment.addEventListener('click', () => {
+            paymentModal.classList.add('hidden');
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === searchModal) {
+                searchModal.classList.add('hidden');
+            }
+            if (e.target === cartModal) {
+                cartModal.classList.add('hidden');
+            }
+            if (e.target === paymentModal) {
+                paymentModal.classList.add('hidden');
+            }
+        });
+
+        // Add ripple effect to buttons
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const ripple = document.createElement('span');
+            const rect = button.getBoundingClientRect();
+            
+            const diameter = Math.max(rect.width, rect.height);
+            const radius = diameter / 2;
+            
+            ripple.style.width = ripple.style.height = `${diameter}px`;
+            ripple.style.left = `${event.clientX - rect.left - radius}px`;
+            ripple.style.top = `${event.clientY - rect.top - radius}px`;
+            ripple.className = 'ripple';
+            
+            button.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+
+        // Add ripple effect to all buttons
+        const buttons = document.querySelectorAll('.add-to-cart-btn, .order-now-btn');
+        buttons.forEach(button => {
+            button.addEventListener('click', createRipple);
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    // Close mobile menu if open
+                    if (mobileMenu.classList.contains('active')) {
+                        hamburgerMenu.classList.remove('active');
+                        mobileMenu.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                    
+                    // Scroll to target
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Enhanced FAQ Accordion
+        const faqQuestions = document.querySelectorAll('.faq-question');
+        
+        faqQuestions.forEach(question => {
+            question.addEventListener('click', () => {
+                const faqItem = question.parentElement;
+                const answer = question.nextElementSibling;
+                const icon = question.querySelector('i');
+                
+                // Toggle current answer
+                faqItem.classList.toggle('active');
+                answer.classList.toggle('active');
+                
+                // Close other answers
+                faqQuestions.forEach(otherQuestion => {
+                    if (otherQuestion !== question) {
+                        const otherFaqItem = otherQuestion.parentElement;
+                        const otherAnswer = otherQuestion.nextElementSibling;
+                        otherFaqItem.classList.remove('active');
+                        otherAnswer.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        // Active navigation highlighting
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        function highlightNavigation() {
+            const scrollY = window.pageYOffset;
+
+            sections.forEach(section => {
+                const sectionHeight = section.offsetHeight;
+                const sectionTop = section.offsetTop - 100;
+                const sectionId = section.getAttribute('id');
+                
+                if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+                    navLinks.forEach(link => {
+                        link.classList.remove('text-mcd-yellow');
+                        if (link.getAttribute('href') === `#${sectionId}`) {
+                            link.classList.add('text-mcd-yellow');
+                        }
+                    });
+                }
+            });
+        }
+
+        window.addEventListener('scroll', highlightNavigation);
+    </script>
+</body>
+</html> 

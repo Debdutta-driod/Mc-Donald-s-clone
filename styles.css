@@ -1,0 +1,290 @@
+/* McDonald's brand colors */
+:root {
+    --mcd-red: #DA291C;
+    --mcd-yellow: #FFC72C;
+    --mcd-dark-red: #B71C1C;
+}
+
+/* Custom utility classes */
+.bg-mcd-red {
+    background-color: var(--mcd-red);
+}
+
+.bg-mcd-yellow {
+    background-color: var(--mcd-yellow);
+}
+
+.text-mcd-red {
+    color: var(--mcd-red);
+}
+
+.text-mcd-yellow {
+    color: var(--mcd-yellow);
+}
+
+/* Enhanced animations */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Apply animations to elements */
+.hero-section {
+    animation: slideInUp 1s ease-out;
+}
+
+.menu-item {
+    animation: float 3s ease-in-out infinite;
+}
+
+.add-to-cart {
+    animation: pulse 2s infinite;
+}
+
+/* Enhanced hover effects */
+.menu-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.add-to-cart:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(218, 41, 28, 0.2);
+}
+
+/* Dark mode styles */
+.dark {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+.dark .bg-white {
+    background-color: #2d2d2d;
+}
+
+.dark .text-gray-600 {
+    color: #a0aec0;
+}
+
+.dark .text-gray-800 {
+    color: #e2e8f0;
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Enhanced scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--mcd-red);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--mcd-dark-red);
+}
+
+/* Enhanced modal styles */
+.modal {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(0.95);
+    opacity: 0;
+}
+
+.modal.show {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal.hidden {
+    transform: scale(0.95);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Enhanced button hover effects */
+.btn-hover-effect {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-hover-effect:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced image carousel styles */
+.swiper {
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+    color: var(--mcd-red) !important;
+    transition: transform 0.3s ease;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+    transform: scale(1.2);
+}
+
+.swiper-pagination-bullet {
+    background: var(--mcd-red) !important;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.swiper-pagination-bullet-active {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* Enhanced cart item styles */
+.cart-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0.5rem;
+}
+
+.cart-item:hover {
+    background-color: rgba(218, 41, 28, 0.05);
+    transform: translateX(5px);
+}
+
+/* Enhanced payment method selection */
+.payment-method {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+}
+
+.payment-method:hover {
+    transform: scale(1.02);
+    border-color: var(--mcd-red);
+}
+
+.payment-method.active {
+    border-color: var(--mcd-red);
+    background-color: var(--mcd-red);
+    color: white;
+}
+
+/* Enhanced loading animation */
+.loading-spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--mcd-red);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Enhanced toast notification */
+.toast {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 1rem;
+    background-color: var(--mcd-red);
+    color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 50;
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Enhanced responsive adjustments */
+@media (max-width: 640px) {
+    .menu-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+    
+    .category-scroll {
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .category-scroll::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .modal {
+        margin: 1rem;
+    }
+}
+
+/* Add smooth scrolling to the whole page */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Add focus styles for better accessibility */
+button:focus,
+input:focus {
+    outline: 2px solid var(--mcd-red);
+    outline-offset: 2px;
+}
+
+/* Add transition to all interactive elements */
+button,
+a,
+input,
+select {
+    transition: all 0.3s ease;
+} 
